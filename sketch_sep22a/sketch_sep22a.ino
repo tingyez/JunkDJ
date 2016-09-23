@@ -61,7 +61,7 @@ void loop()
   delay(40);
   Serial.println("Dial activity!");
   clearRing();
-  counter = 0;
+  counter = -1;
   pulseactive = false;
   while( digitalRead(rest) == 0 )       // Count pulses while dial rotates
   {
