@@ -2,9 +2,9 @@
  * Get input from a rotary dial found in old phones.
  *
  * Notes on rotary dial wireing:
- *  The rest wire typically the red wire in dials from dutch PTT phones
- *  The count pulse wire is typically the blue wire
- *  The common (ground) wire is typically the yellow wire
+ *  The rest wire is the white wire
+ *  The count pulse wire is the blue wire
+ *  The common (ground) wire is the red wire
  *  
  *  Wire up the rest and pulse wire to I/O pins on the arduino (specified below)
  *  Use 10k pullup resistors to 5V on both pins.
@@ -14,7 +14,7 @@
  *  Next wire all negative leads of the LED's to ground. The I/O pins can be specified below.
  */
 
-#define rest  2      /* Typically the red wire in dials from dutch PTT phones */
+#define rest  2      /* Typically the white wire */
 #define pulse  3     /* Typically the blue wire */
 
 // Led light ring     0   1   2   3   4  5  6   7   8   9
@@ -84,6 +84,8 @@ void loop()
     }
   }
   Serial.println( "END" );
+
+  counter = counter - 1;
   
   if( counter == 0 || counter > 10 )
   {
