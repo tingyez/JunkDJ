@@ -67,14 +67,13 @@ void setup() {
 
   Serial.begin(9600);
   Serial.println("Welcome to JunkDJ!");
-  Serial.println("Please dail the phone to select the track");
-
-  //Serial.print(F("F_CPU = "));
-  //Serial.println(F_CPU);
-  //Serial.print(F("Free RAM = ")); // available in Version 1.0 F() bases the string to into Flash, to use less SRAM.
-  //Serial.print(FreeRam(), DEC);  // FreeRam() is provided by SdFatUtil.h
-  //Serial.println(F(" Should be a base line of 1017, on ATmega328 when using INTx"));
-
+  Serial.println();
+  Serial.println();
+  Serial.println("Please dail the phone to play music:");
+  Serial.println("1-9: select a track");
+  Serial.println("0: stop the music");
+  Serial.println();
+  Serial.println();
 
   //Initialize the SdCard.
   if(!sd.begin(SD_SEL, SPI_FULL_SPEED)) sd.initErrorHalt();
@@ -84,14 +83,6 @@ void setup() {
   //Initialize the MP3 Player Shield
   result = MP3player.begin();
   //check result, see readme for error codes.
-  if(result != 0) {
-    //Serial.print(F("Error code: "));
-    //Serial.print(result);
-    //Serial.println(F(" when trying to start MP3 player"));
-    if( result == 6 ) {
-      //Serial.println(F("Warning: patch file not found, skipping.")); // can be removed for space, if needed.
-      //Serial.println(F("Use the \"d\" command to verify SdCard can be read")); // can be removed for space, if needed.
-    }
   }
 
 #if (0)
@@ -103,12 +94,6 @@ void setup() {
   }
 #endif
 
-  // help();
-  //last_ms_char = millis(); // stroke the inter character timeout.
-  buffer_pos = 0; // start the command string at zero length.
-  //parse_menu('l'); // display the list of files to play
-
-}
 void loop()
 {
   while (digitalRead(10)==HIGH)
@@ -121,14 +106,25 @@ if ((millis() - lastStateChangeTime) > dialHasFinishedRotatingAfterMs) {
 if (needToPrint) {
 // if it's only just finished being dialed, we need to send the number down the serial
 // line and reset the count. We mod the count by 10 because '0' will send 10 pulses.
-Serial.print("You select track: ");
-Serial.println(count-1);
-Serial.println("You can add some sound effect!");
 
-if(count==1)
+if(count==1){
   MP3player.stopTrack();
-  else
-  MP3player.playTrack(count-1);
+  Serial.println("Dail 1-9 to select one track.");
+  Serial.println();
+}
+  
+  else{
+   Serial.print("You select track: ");
+   Serial.println(count-1);
+   Serial.println("The music is playing");
+   MP3player.stopTrack();
+   MP3player.playTrack(count-1);
+   delay(500);
+   Serial.println();
+   Serial.println("Hey,you can add some sound effect!");
+   Serial.println();
+  }
+
 
 needToPrint = 0;
 count = 0;
