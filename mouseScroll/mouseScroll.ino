@@ -38,10 +38,10 @@ void mouse_write(char data)
   char i;
   char parity = 1;
 
-  //  Serial.print("Sending ");
-  //  Serial.print(data, HEX);
-  //  Serial.print(" to mouse\n");
-  //  Serial.print("RTS");
+    Serial.print("Sending ");
+    Serial.print(data, HEX);
+    Serial.print(" to mouse\n");
+    Serial.print("RTS\n");
   /* put pins in output mode */
   gohi(MDATA);
   gohi(MCLK);
@@ -87,12 +87,17 @@ void mouse_write(char data)
   delayMicroseconds(50);
   while (digitalRead(MCLK) == HIGH)
     ;
+  Serial.print("Switch mode1");
+    
   /* wait for mouse to switch modes */
   while ((digitalRead(MCLK) == LOW) || (digitalRead(MDATA) == LOW))
     ;
+
+  Serial.print("Switch mode2");
+    
   /* put a hold on the incoming data. */
   golo(MCLK);
-  //  Serial.print("done.\n");
+    Serial.print("done.\n");
 }
 
 /*
@@ -147,32 +152,33 @@ void mouse_init()
    
   gohi(MCLK);
   gohi(MDATA);
-  //  Serial.print("Sending reset to mouse\n");
+    Serial.println("Sending reset to mouse\n");
   mouse_write(0xff);
+    Serial.println("mouse_write");
   mouse_read();  /* ack byte */
-  //  Serial.print("Read ack byte1\n");
+    Serial.print("Read ack byte1\n");
   mouse_read();  /* blank */
   mouse_read();  /* blank */
-  //  Serial.print("Setting sample rate 200\n");
+    Serial.print("Setting sample rate 200\n");
   mouse_write(0xf3);  /* Set rate command */
   mouse_read();  /* ack */
   mouse_write(0xC8);  /* Set rate command */
   mouse_read();  /* ack */
-  //  Serial.print("Setting sample rate 100\n");
+    Serial.print("Setting sample rate 100\n");
   mouse_write(0xf3);  /* Set rate command */
   mouse_read();  /* ack */
   mouse_write(0x64);  /* Set rate command */
   mouse_read();  /* ack */
-  //  Serial.print("Setting sample rate 80\n");
+    Serial.print("Setting sample rate 80\n");
   mouse_write(0xf3);  /* Set rate command */
   mouse_read();  /* ack */
   mouse_write(0x50);  /* Set rate command */
   mouse_read();  /* ack */
-  //  Serial.print("Read device type\n");
+    Serial.print("Read device type\n");
   mouse_write(0xf2);  /* Set rate command */
   mouse_read();  /* ack */
   mouse_read();  /* mouse id, if this value is 0x00 mouse is standard, if it is 0x03 mouse is Intellimouse */
-  //  Serial.print("Setting wheel\n");
+    Serial.print("Setting wheel\n");
   mouse_write(0xe8);  /* Set wheel resolution */
   mouse_read();  /* ack */
   mouse_write(0x03);  /* 8 counts per mm */
@@ -186,17 +192,24 @@ void mouse_init()
   mouse_write(0xf4);  /* Enable device */
   mouse_read();  /* ack */
 
-  //  Serial.print("Sending remote mode code\n");
+    Serial.print("Sending remote mode code\n");
   mouse_write(0xf0);  /* remote mode */
   mouse_read();  /* ack */
-  //  Serial.print("Read ack byte2\n");
+    Serial.print("Read ack byte2\n");
   delayMicroseconds(100);
 }
 
 void setup()
 {
   Serial.begin(9600);
+
+  Serial.println("Trying to initialize");
+  
   mouse_init();
+
+  Serial.println("Initialization finished");
+  
+  
 }
 
 /*
@@ -209,6 +222,8 @@ void loop()
   char mx;
   char my;
   char mz;
+
+  Serial.println("Trying to get the data");
 
   /* get a reading from the mouse */
   mouse_write(0xeb);  /* give me data! */
