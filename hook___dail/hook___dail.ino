@@ -66,6 +66,7 @@ void setup() {
   pinMode(in, INPUT);//dail
 
   Serial.begin(9600);
+  Serial.setTimeout(50);
   Serial.println("Welcome to JunkDJ!");
   Serial.println();
   Serial.println();

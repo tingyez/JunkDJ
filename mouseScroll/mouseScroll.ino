@@ -226,6 +226,7 @@ void loop()
 {
   char mstat;
   char mx;
+
   char my;
   char mz;
 

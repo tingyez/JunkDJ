@@ -72,14 +72,11 @@ void setup() {
   pinMode(in, INPUT);//dail
 
   Serial.begin(9600);
-  Serial.println("Welcome to JunkDJ!");
-  Serial.println();
-  Serial.println();
+  Serial.println("Welcome to JunkDJ!\n\n");
   Serial.println("Please dail the phone to play music:");
   Serial.println("1-9: select a track");
-  Serial.println("0: stop the music");
-  Serial.println();
-  Serial.println();
+  Serial.println("0: stop the music\n\n");
+
 
   //Initialize the SdCard.
   if(!sd.begin(SD_SEL, SPI_FULL_SPEED)) sd.initErrorHalt();
@@ -115,7 +112,6 @@ void loop()
   while (digitalRead(10)==HIGH)
   {
     int reading = digitalRead(in);
-  
     
     if ((millis() - lastStateChangeTime) > dialHasFinishedRotatingAfterMs) {
       // the dial isn't being dialed, or has just finished being dialed.
@@ -131,19 +127,17 @@ void loop()
         else{
          Serial.print("You select track: ");
          Serial.println(count-1);
-         Serial.println("The music is playing");
+         Serial.println("The music is playing\n");
          MP3player.stopTrack();
          MP3player.playTrack(count-1);
-         Serial.println();
-         Serial.println("Hey,you can add some sound effect!");
-         Serial.println();
+         Serial.println("Hey,you can add some sound effect!\n");
         }
-      
-      
+
       needToPrint = 0;
       count = 0;
       cleared = 0;
       }
+      mouse_ctrl();
     } 
     
     if (reading != lastState) {
@@ -174,9 +168,12 @@ void mouse_ctrl(){
   char my;
   char mz;
 
+  
+
   /* get a reading from the mouse */
   mouse_write(0xeb);  /* give me data! */
   mouse_read();      /* ignore ack */
+  
   mstat = mouse_read();
   mx = mouse_read();
   my = mouse_read();
@@ -186,6 +183,7 @@ void mouse_ctrl(){
   String yacc = String(my,DEC);
   String zacc = String(mz, DEC);
 
+  
   if ( (mx != 0) || (my != 0 ) || (mz != 0 )){
     /* send the data back up */
     Serial.print(mstat, BIN);
@@ -193,40 +191,81 @@ void mouse_ctrl(){
     Serial.print("\tY=");    Serial.print(yacc);
     Serial.print("\tZ=");    Serial.print(zacc);
     Serial.println();  
-  }
+
+    //  VOLUMN CTRL
+    if (zacc != "0"){
+      union twobyte mp3_vol; // create key_command existing variable that can be both word and double byte of left and right.
+      mp3_vol.word = MP3player.getVolume(); // returns a double uint8_t of Left and Right packed into int16_t
+      
+      if (zacc < "0") {    // volumn UP
+        // note dB is negative
+        // assume equal balance and use byte[1] for math
+        if(mp3_vol.byte[1] >= 254) { // range check
+          mp3_vol.byte[1] = 254;
+        } else {
+          mp3_vol.byte[1] += 2; // keep it simpler with whole dB's
+        }
+        Serial.println("now the music is LOUDER");
+      }
+      else if (zacc > "0"){    // volumn DOWN
+        if(mp3_vol.byte[1] <= 2) { // range check
+          mp3_vol.byte[1] = 2;
+        } else {
+          mp3_vol.byte[1] -= 2;
+        }
+        Serial.println("now the music is QUIETER");
+      }
+      // push byte[1] into both left and right assuming equal balance.
+      MP3player.setVolume(mp3_vol.byte[1], mp3_vol.byte[1]); // commit new volume
+      Serial.print(F("Volume changed to -"));
+      Serial.print(mp3_vol.byte[1]>>1, 1);
+      Serial.println(F("[dB]"));
+    }
   
-//  VOLUMN CTRL
-  if (zacc < "0") {    // volumn UP
-    Serial.println("now the music is LOUDER");
-    
-  }
-  else if (zacc > "0"){    // volumn DOWN
-    Serial.println("now the music is QUIETER");
-    
-  }
-
-//  FREQUENCY CTRL
-
-  if (xacc == "0"){
-    countx = 0;
-  }
-  else if (xacc > "0"){
-    ++countx;
-
-    if (countx == 3){   // frequency UP
-      Serial.println("now the music is FASTER");
-
+  //  FREQUENCY CTRL
+  
+    if (xacc == "0"){
       countx = 0;
     }
-  }
-  else if (xacc < "0"){
-    --countx;
-
-    if (countx == -3){    // frequency DOWN
-      Serial.println("now the music is SLOWER");
-
-      countx = 0;
+    else{
+      uint16_t playspeed = MP3player.getPlaySpeed(); // create key_command existing variable
+      // note playspeed of Zero is equal to ONE, normal speed.
+      
+      if (xacc > "0"){
+        ++countx;
+    
+        if (countx == 3){   // frequency UP
+          // note dB is negative
+          // assume equal balance and use byte[1] for math
+          if(playspeed >= 254) { // range check
+            playspeed = 5;
+          } else {
+            playspeed += 1; // keep it simpler with whole dB's
+          }
+          Serial.println("now the music is FASTER");
+          countx = 0;
+        }
+      }
+      else if (xacc < "0"){
+        --countx;
+    
+        if (countx == -3){    // frequency DOWN
+          if(playspeed == 0) { // range check
+            playspeed = 0;
+          } else {
+            playspeed -= 1;
+          }
+          Serial.println("now the music is SLOWER");
+          countx = 0;
+        }
+      }
+  
+      MP3player.setPlaySpeed(playspeed); // commit new playspeed
+      Serial.print(F("playspeed to "));
+      Serial.println(playspeed, DEC);
     }
+
+    
   }
 }
 
@@ -317,14 +356,16 @@ char mouse_read(void)
   int i;
   char bit = 0x01;
 
-  //  Serial.print("reading byte from mouse\n");
+//    Serial.print("reading byte from mouse\n");
   /* start the clock */
   gohi(MCLK);
   gohi(MDATA);
+//  Serial.println("TEST");
   delayMicroseconds(50);
   while (digitalRead(MCLK) == HIGH)
     ;
   delayMicroseconds(5);  /* not sure why */
+//  Serial.println("TEST2");
   while (digitalRead(MCLK) == LOW) /* eat start bit */
     ;
   for (i=0; i < 8; i++) {
@@ -348,10 +389,11 @@ char mouse_read(void)
   while (digitalRead(MCLK) == LOW)
     ;
   /* put a hold on the incoming data. */
+//  Serial.println("TEST3");
   golo(MCLK);
-  //  Serial.print("Recvd data ");
-  //  Serial.print(data, HEX);
-  //  Serial.print(" from mouse\n");
+//    Serial.print("Recvd data ");
+//    Serial.print(data, HEX);
+//    Serial.print(" from mouse\n");
   return data;
 }
 
