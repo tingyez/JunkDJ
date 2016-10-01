@@ -112,38 +112,39 @@ void setup() {
 
 void loop()
 {
-  while (digitalRead(10)==HIGH){
+  while (digitalRead(10)==HIGH)
+  {
     int reading = digitalRead(in);
   
-  
+    
     if ((millis() - lastStateChangeTime) > dialHasFinishedRotatingAfterMs) {
       // the dial isn't being dialed, or has just finished being dialed.
-        if (needToPrint) {
-          // if it's only just finished being dialed, we need to send the number down the serial
-          // line and reset the count. We mod the count by 10 because '0' will send 10 pulses.
-          
-          if(count==1){
-            MP3player.stopTrack();
-            Serial.println("Dail 1-9 to select one track.");
-            Serial.println();
-          }
-            
-          else{
-           Serial.print("You select track: ");
-           Serial.println(count-1);
-           Serial.println("The music is playing");
-           MP3player.stopTrack();
-           MP3player.playTrack(count-1);
-           Serial.println("Hey,you can add some sound effect!/n");
-          }
-        
-        
-        needToPrint = 0;
-        count = 0;
-        cleared = 0;
+      if (needToPrint) {
+        // if it's only just finished being dialed, we need to send the number down the serial
+        // line and reset the count. We mod the count by 10 because '0' will send 10 pulses.
+      
+        if(count==1){
+          MP3player.stopTrack();
+          Serial.println("Dail 1-9 to select one track.");
+          Serial.println();
+        }
+        else{
+         Serial.print("You select track: ");
+         Serial.println(count-1);
+         Serial.println("The music is playing");
+         MP3player.stopTrack();
+         MP3player.playTrack(count-1);
+         Serial.println();
+         Serial.println("Hey,you can add some sound effect!");
+         Serial.println();
+        }
+      
+      
+      needToPrint = 0;
+      count = 0;
+      cleared = 0;
       }
     } 
-
     
     if (reading != lastState) {
       lastStateChangeTime = millis();
@@ -161,12 +162,9 @@ void loop()
       }
     }
     lastState = reading;
-
-  mouse_ctrl();
-  delay(20);
-  
   }
 } 
+
 
 //----------------Function for the Mouse-----------------
 
