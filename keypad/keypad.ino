@@ -40,22 +40,41 @@ byte colPins[COLS] = { 11, 8, 6 };
 Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 #define ledpin 13
+int motorPin = 2;
+
 
 void setup()
 {
   pinMode(ledpin,OUTPUT);
+  pinMode(motorPin, OUTPUT);
   digitalWrite(ledpin, HIGH);
   Serial.begin(9600);
+
+  while (! Serial);
+  Serial.println("Speed 0 to 255");
 }
 
 void loop()
 {
+//  if (Serial.available())
+//  {
+//    int speed = Serial.parseInt();
+//    if (speed >= 0 && speed <= 255)
+//    {
+//      analogWrite(motorPin, speed);
+//    }
+//  }
+  
 
   int noteDuration = 1000/8;
    
   char key = kpd.getKey();
+  int reading = digitalRead(key);
+
+  
   if(key)  // Check for a valid key.
   {
+    Serial.println(reading);
     switch (key)
     {
       // to calculate the note duration, take one second 
@@ -63,6 +82,10 @@ void loop()
       //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
       case '1':
         tone(4, NOTE_A3,noteDuration);
+        delay(125);
+        tone(4, NOTE_B3,noteDuration);
+        delay(125);
+        tone(4, NOTE_C3,noteDuration);
         break;
       case '2':
         tone(4, NOTE_B3,noteDuration);
@@ -92,11 +115,12 @@ void loop()
         tone(4, NOTE_C5,noteDuration);
         break;
       case '*':
-//        digitalWrite(ledpin, LOW);     
-//        tone(4, NOTE_G4,noteDuration);
+        digitalWrite(ledpin, LOW);
+        analogWrite(motorPin, 200); 
         break;
       case '#':
-//        digitalWrite(ledpin, HIGH);
+        digitalWrite(ledpin, HIGH);
+        analogWrite(motorPin, 0);
         break;
       default:
         Serial.println(key);
