@@ -56,7 +56,7 @@ int count;
 int in = 5;
 int lastState = LOW;
 int trueState = LOW;
-long lastStateChangeTime = 0;
+long lastStateChangeTime = 0; 
 int cleared = 0;
 
 void setup() {
@@ -119,7 +119,6 @@ if(count==1){
    Serial.println("The music is playing");
    MP3player.stopTrack();
    MP3player.playTrack(count-1);
-   delay(500);
    Serial.println();
    Serial.println("Hey,you can add some sound effect!");
    Serial.println();

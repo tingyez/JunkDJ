@@ -71,32 +71,17 @@ int8_t buffer_pos; // next position to recieve character from Serial port.
  */
   char buffer[6]; // 0-35K+null
 
-
-// constants
-
-int dialHasFinishedRotatingAfterMs = 100;
-int debounceDelay = 10;
-int needToPrint = 0;
-int count;
-int in = 2;
-int lastState = LOW;
-int trueState = LOW;
-long lastStateChangeTime = 0;
-int cleared = 0;
-
 void setup() {
 
   uint8_t result; //result code from some function as to be tested at later time.
 
-  Serial.begin(9600);
-  Serial.println("Welcome to JunkDJ!");
-  Serial.println("Please dail the phone to select the track");
+  Serial.begin(115200);
 
-  //Serial.print(F("F_CPU = "));
-  //Serial.println(F_CPU);
-  //Serial.print(F("Free RAM = ")); // available in Version 1.0 F() bases the string to into Flash, to use less SRAM.
-  //Serial.print(FreeRam(), DEC);  // FreeRam() is provided by SdFatUtil.h
-  //Serial.println(F(" Should be a base line of 1017, on ATmega328 when using INTx"));
+  Serial.print(F("F_CPU = "));
+  Serial.println(F_CPU);
+  Serial.print(F("Free RAM = ")); // available in Version 1.0 F() bases the string to into Flash, to use less SRAM.
+  Serial.print(FreeRam(), DEC);  // FreeRam() is provided by SdFatUtil.h
+  Serial.println(F(" Should be a base line of 1017, on ATmega328 when using INTx"));
 
 
   //Initialize the SdCard.
@@ -108,28 +93,28 @@ void setup() {
   result = MP3player.begin();
   //check result, see readme for error codes.
   if(result != 0) {
-    //Serial.print(F("Error code: "));
-    //Serial.print(result);
-    //Serial.println(F(" when trying to start MP3 player"));
+    Serial.print(F("Error code: "));
+    Serial.print(result);
+    Serial.println(F(" when trying to start MP3 player"));
     if( result == 6 ) {
-      //Serial.println(F("Warning: patch file not found, skipping.")); // can be removed for space, if needed.
-      //Serial.println(F("Use the \"d\" command to verify SdCard can be read")); // can be removed for space, if needed.
+      Serial.println(F("Warning: patch file not found, skipping.")); // can be removed for space, if needed.
+      Serial.println(F("Use the \"d\" command to verify SdCard can be read")); // can be removed for space, if needed.
     }
   }
 
 #if (0)
   // Typically not used by most shields, hence commented out.
-  //Serial.println(F("Applying ADMixer patch."));
+  Serial.println(F("Applying ADMixer patch."));
   if(MP3player.ADMixerLoad("admxster.053") == 0) {
-    //Serial.println(F("Setting ADMixer Volume."));
+    Serial.println(F("Setting ADMixer Volume."));
     MP3player.ADMixerVol(-3);
   }
 #endif
 
-  // help();
-  //last_ms_char = millis(); // stroke the inter character timeout.
+  help();
+  last_ms_char = millis(); // stroke the inter character timeout.
   buffer_pos = 0; // start the command string at zero length.
-  //parse_menu('l'); // display the list of files to play
+  parse_menu('l'); // display the list of files to play
 
 }
 
@@ -279,7 +264,7 @@ void parse_menu(byte key_command) {
     sd.chvol(); // assign desired sdcard's volume.
 #endif
     //tell the MP3 Shield to play a track
-    result = MP3player.playTrack(key_command);  //control play track
+    result = MP3player.playTrack(key_command);
 
     //check result, see readme for error codes.
     if(result != 0) {

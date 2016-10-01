@@ -1,6 +1,6 @@
 int needToPrint = 0;
 int count;
-int in = 2;
+int in = 5;
 int lastState = LOW;
 int trueState = LOW;
 long lastStateChangeTime = 0;
