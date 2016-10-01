@@ -13,8 +13,10 @@
  * Pin 5 is the mouse data pin, pin 6 is the clock pin
  * Feel free to use whatever pins are convenient.
  */
-#define MDATA A0
-#define MCLK A1
+#define MDATA A0 //yellow
+#define MCLK A1  //white
+
+
 
 /*
  * according to some code I saw, these functions will
@@ -96,7 +98,7 @@ void mouse_write(char data)
     
   /* put a hold on the incoming data. */
   golo(MCLK);
-    Serial.print("done.\n");
+//    Serial.print("done.\n");
 }
 
 /*
@@ -198,17 +200,22 @@ void mouse_init()
   delayMicroseconds(100);
 }
 
+//------------------------------MAIN PART-------------------------------
+
+
+int countx, county, countz;
+
 void setup()
 {
   Serial.begin(9600);
 
-  Serial.println("Trying to initialize");
+  countx = 0;
+  county = 0;
+  countz = 0;
   
   mouse_init();
 
   Serial.println("Initialization finished");
-  
-  
 }
 
 /*
@@ -230,14 +237,55 @@ void loop()
   my = mouse_read();
   mz = mouse_read();
 
-  /* send the data back up */
-  Serial.print(mstat, BIN);
-  Serial.print("\tX=");
-  Serial.print(mx, DEC);
-  Serial.print("\tY=");
-  Serial.print(my, DEC);
-  Serial.print("\tZ=");
-  Serial.print(mz, DEC);
-  Serial.println();
-  delay(20);  /* twiddle */
+  String xacc = String(mx, DEC);
+  String yacc = String(my,DEC);
+  String zacc = String(mz, DEC);
+
+  if ( (mx != 0) || (my != 0 ) || (mz != 0 )){
+    /* send the data back up */
+    Serial.print(mstat, BIN);
+    Serial.print("\tX=");    Serial.print(xacc);
+    Serial.print("\tY=");    Serial.print(yacc);
+    Serial.print("\tZ=");    Serial.print(zacc);
+    Serial.println();  
+  }
+  
+//  VOLUMN CTRL
+  if (zacc < "0") {    // volumn UP
+    Serial.println("now the music is LOUDER");
+    
+  }
+  else if (zacc > "0"){    // volumn DOWN
+    Serial.println("now the music is QUIETER");
+    
+  }
+
+//  FREQUENCY CTRL
+
+  if (xacc == "0"){
+    countx = 0;
+  }
+  else if (xacc > "0"){
+    ++countx;
+
+    if (countx == 3){   // frequency UP
+      Serial.println("now the music is FASTER");
+
+      countx = 0;
+    }
+  }
+  else if (xacc < "0"){
+    --countx;
+
+    if (countx == -3){    // frequency DOWN
+      Serial.println("now the music is SLOWER");
+
+      countx = 0;
+    }
+  }
+
+  
+
+  delay(20);/* twiddle */
+  
 }
