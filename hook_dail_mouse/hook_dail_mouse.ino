@@ -7,6 +7,11 @@
 //and the MP3 Shield Library
 #include <SFEMP3Shield.h>
 
+//-------------for the MOUSE
+#define MDATA A2 //yellow
+#define MCLK A3  //white
+
+
 // Below is not needed if interrupt driven. Safe to remove if not using.
 #if defined(USE_MP3_REFILL_MEANS) && USE_MP3_REFILL_MEANS == USE_MP3_Timer1
   #include <TimerOne.h>
@@ -56,18 +61,9 @@ int count;
 int in = 5;
 int lastState = LOW;
 int trueState = LOW;
-long lastStateChangeTime = 0;
+long lastStateChangeTime = 0; 
 int cleared = 0;
-
-//------------------------Define for MOUSE---------------------
-
-#define MDATA A0
-#define MCLK A1
-
 int countx, county, countz;
-
-
-
 
 void setup() {
 
@@ -77,16 +73,13 @@ void setup() {
 
   Serial.begin(9600);
   Serial.println("Welcome to JunkDJ!");
-  Serial.println("Please dail the phone to select the track");
-
-  mouse_init();
-
-  //Serial.print(F("F_CPU = "));
-  //Serial.println(F_CPU);
-  //Serial.print(F("Free RAM = ")); // available in Version 1.0 F() bases the string to into Flash, to use less SRAM.
-  //Serial.print(FreeRam(), DEC);  // FreeRam() is provided by SdFatUtil.h
-  //Serial.println(F(" Should be a base line of 1017, on ATmega328 when using INTx"));
-
+  Serial.println();
+  Serial.println();
+  Serial.println("Please dail the phone to play music:");
+  Serial.println("1-9: select a track");
+  Serial.println("0: stop the music");
+  Serial.println();
+  Serial.println();
 
   //Initialize the SdCard.
   if(!sd.begin(SD_SEL, SPI_FULL_SPEED)) sd.initErrorHalt();
@@ -96,15 +89,17 @@ void setup() {
   //Initialize the MP3 Player Shield
   result = MP3player.begin();
   //check result, see readme for error codes.
-  if(result != 0) {
-    //Serial.print(F("Error code: "));
-    //Serial.print(result);
-    //Serial.println(F(" when trying to start MP3 player"));
-    if( result == 6 ) {
-      //Serial.println(F("Warning: patch file not found, skipping.")); // can be removed for space, if needed.
-      //Serial.println(F("Use the \"d\" command to verify SdCard can be read")); // can be removed for space, if needed.
-    }
-  }
+
+
+  //Initialize the MOUSE
+
+  countx = 0;
+  county = 0;
+  countz = 0;
+  
+  mouse_init();
+  
+}
 
 #if (0)
   // Typically not used by most shields, hence commented out.
@@ -115,60 +110,67 @@ void setup() {
   }
 #endif
 
-  // help();
-  //last_ms_char = millis(); // stroke the inter character timeout.
-  buffer_pos = 0; // start the command string at zero length.
-  //parse_menu('l'); // display the list of files to play
-
-}
-
 void loop()
 {
-  while (digitalRead(10)==HIGH)
-  {
+  while (digitalRead(10)==HIGH){
     int reading = digitalRead(in);
   
   
-  if ((millis() - lastStateChangeTime) > dialHasFinishedRotatingAfterMs) {
-    // the dial isn't being dialed, or has just finished being dialed.
-    if (needToPrint) {
-      // if it's only just finished being dialed, we need to send the number down the serial
-      // line and reset the count. We mod the count by 10 because '0' will send 10 pulses.
-      Serial.print("You select track: ");
-      Serial.println(count-1);
-      Serial.println("You can add some sound effect!");
-      
-      if(count==1)
-        MP3player.stopTrack();
-        else
-        MP3player.playTrack(count-1);
-      
-      needToPrint = 0;
-      count = 0;
-      cleared = 0;
+    if ((millis() - lastStateChangeTime) > dialHasFinishedRotatingAfterMs) {
+      // the dial isn't being dialed, or has just finished being dialed.
+        if (needToPrint) {
+          // if it's only just finished being dialed, we need to send the number down the serial
+          // line and reset the count. We mod the count by 10 because '0' will send 10 pulses.
+          
+          if(count==1){
+            MP3player.stopTrack();
+            Serial.println("Dail 1-9 to select one track.");
+            Serial.println();
+          }
+            
+          else{
+           Serial.print("You select track: ");
+           Serial.println(count-1);
+           Serial.println("The music is playing");
+           MP3player.stopTrack();
+           MP3player.playTrack(count-1);
+           Serial.println("Hey,you can add some sound effect!/n");
+          }
+        
+        
+        needToPrint = 0;
+        count = 0;
+        cleared = 0;
+      }
+    } 
+
+    
+    if (reading != lastState) {
+      lastStateChangeTime = millis();
     }
-  } 
-  
-  if (reading != lastState) {
-    lastStateChangeTime = millis();
-  }
-  if ((millis() - lastStateChangeTime) > debounceDelay) {
-    // debounce - this happens once it's stablized
-    if (reading != trueState) {
-      // this means that the switch has either just gone from closed->open or vice versa.
-      trueState = reading;
-      if (trueState == HIGH) {
-        // increment the count of pulses if it's gone high.
-        count++; 
-        needToPrint = 1; // we'll need to print this number (once the dial has finished rotating)
-      } 
-    }
+    if ((millis() - lastStateChangeTime) > debounceDelay) {
+      // debounce - this happens once it's stablized
+      if (reading != trueState) {
+        // this means that the switch has either just gone from closed->open or vice versa.
+        trueState = reading;
+        if (trueState == HIGH) {
+          // increment the count of pulses if it's gone high.
+          count++; 
+          needToPrint = 1; // we'll need to print this number (once the dial has finished rotating)
+        } 
+      }
     }
     lastState = reading;
+
+  mouse_ctrl();
+  delay(20);
+  
   }
+} 
 
-  //  -------------------------For the mouse
+//----------------Function for the Mouse-----------------
 
+void mouse_ctrl(){
   char mstat;
   char mx;
   char my;
@@ -186,43 +188,23 @@ void loop()
   String yacc = String(my,DEC);
   String zacc = String(mz, DEC);
 
-//  if ((mx != 0) || (my != 0 ) || (mz != 0 )){
+  if ( (mx != 0) || (my != 0 ) || (mz != 0 )){
     /* send the data back up */
     Serial.print(mstat, BIN);
     Serial.print("\tX=");    Serial.print(xacc);
     Serial.print("\tY=");    Serial.print(yacc);
     Serial.print("\tZ=");    Serial.print(zacc);
     Serial.println();  
-//  }
+  }
   
 //  VOLUMN CTRL
-  if (zacc != "0"){
-    union twobyte mp3_vol; // create key_command existing variable that can be both word and double byte of left and right.
-    mp3_vol.word = MP3player.getVolume(); // returns a double uint8_t of Left and Right packed into int16_t
+  if (zacc < "0") {    // volumn UP
+    Serial.println("now the music is LOUDER");
     
-    if (zacc < "0") {    // volumn UP
-      // note dB is negative
-      // assume equal balance and use byte[1] for math
-      if(mp3_vol.byte[1] >= 254) { // range check
-        mp3_vol.byte[1] = 254;
-      } else {
-        mp3_vol.byte[1] += 2; // keep it simpler with whole dB's
-      }
-      Serial.println("now the music is LOUDER");
-    }
-    else if (zacc > "0"){    // volumn DOWN
-      if(mp3_vol.byte[1] <= 2) { // range check
-        mp3_vol.byte[1] = 2;
-      } else {
-        mp3_vol.byte[1] -= 2;
-      }
-      Serial.println("now the music is QUIETER");
-    }
-    // push byte[1] into both left and right assuming equal balance.
-    MP3player.setVolume(mp3_vol.byte[1], mp3_vol.byte[1]); // commit new volume
-    Serial.print(F("Volume changed to -"));
-    Serial.print(mp3_vol.byte[1]>>1, 1);
-    Serial.println(F("[dB]"));
+  }
+  else if (zacc > "0"){    // volumn DOWN
+    Serial.println("now the music is QUIETER");
+    
   }
 
 //  FREQUENCY CTRL
@@ -230,48 +212,26 @@ void loop()
   if (xacc == "0"){
     countx = 0;
   }
-  else{
-    uint16_t playspeed = MP3player.getPlaySpeed(); // create key_command existing variable
-    // note playspeed of Zero is equal to ONE, normal speed.
-    
-    if (xacc > "0"){
-      ++countx;
-  
-      if (countx == 3){   // frequency UP
-        // note dB is negative
-        // assume equal balance and use byte[1] for math
-        if(playspeed >= 254) { // range check
-          playspeed = 5;
-        } else {
-          playspeed += 1; // keep it simpler with whole dB's
-        }
-        Serial.println("now the music is FASTER");
-        countx = 0;
-      }
-    }
-    else if (xacc < "0"){
-      --countx;
-  
-      if (countx == -3){    // frequency DOWN
-        if(playspeed == 0) { // range check
-          playspeed = 0;
-        } else {
-          playspeed -= 1;
-        }
-        Serial.println("now the music is SLOWER");
-        countx = 0;
-      }
-    }
+  else if (xacc > "0"){
+    ++countx;
 
-    MP3player.setPlaySpeed(playspeed); // commit new playspeed
-    Serial.print(F("playspeed to "));
-    Serial.println(playspeed, DEC);
+    if (countx == 3){   // frequency UP
+      Serial.println("now the music is FASTER");
+
+      countx = 0;
+    }
   }
-  
-} 
+  else if (xacc < "0"){
+    --countx;
 
+    if (countx == -3){    // frequency DOWN
+      Serial.println("now the music is SLOWER");
 
-//-------------------------------Function for MOUSE-----------------------------------
+      countx = 0;
+    }
+  }
+}
+
 void gohi(int pin)
 {
   pinMode(pin, INPUT);
@@ -448,4 +408,3 @@ void mouse_init()
 //    Serial.print("Read ack byte2\n");
   delayMicroseconds(100);
 }
-

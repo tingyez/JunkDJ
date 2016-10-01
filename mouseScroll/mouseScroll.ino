@@ -13,8 +13,8 @@
  * Pin 5 is the mouse data pin, pin 6 is the clock pin
  * Feel free to use whatever pins are convenient.
  */
-#define MDATA A0 //yellow
-#define MCLK A1  //white
+#define MDATA A2 //yellow
+#define MCLK A3  //white
 
 
 
