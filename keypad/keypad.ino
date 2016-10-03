@@ -142,6 +142,8 @@ int underworld_tempo[] = {
   3, 3, 3
 };
 
+  int count=0;
+
 void setup()
 {
   pinMode(ledpin,OUTPUT);
@@ -247,11 +249,13 @@ void loop()
 
         break;
       case '*':
-//        digitalWrite(ledpin, LOW);
-        analogWrite(motorPin, 200); 
+        count++;
+        if (count%2==1)
+            analogWrite(motorPin, 200); 
+        else
+            analogWrite(motorPin, 0);
         break;
       case '#':
-//        digitalWrite(ledpin, HIGH);
         analogWrite(motorPin, 0);
         break;
       default:
