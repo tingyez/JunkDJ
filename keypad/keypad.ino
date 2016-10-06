@@ -17,27 +17,41 @@
 #include "pitches.h"
 
 
-const byte ROWS = 4; // Four rows
-const byte COLS = 3; // Three columns
+const byte aROWS = 4; // Four rows
+const byte aCOLS = 3; // Three columns
 // Define the Keymap
-char keys[ROWS][COLS] = {
+char akeys[aROWS][aCOLS] = {
   {'1','2','3'},
   {'4','5','6'},
   {'7','8','9'},
   {'#','0','*'}
 };
+
+const byte bROWS = 1; // + one rows
+const byte bCOLS = 3; // Three columns
+// Define the Keymap
+char bkeys[bROWS][bCOLS] = {
+  {'a','b','c'}
+};
+
+
 // Connect keypad ROW0, ROW1, ROW2 and ROW3 to these Arduino pins.
 //byte rowPins[ROWS] = { 9, 8, 7, 6 };
 // Connect keypad COL0, COL1 and COL2 to these Arduino pins.
 //byte colPins[COLS] = { 12, 11, 10 }; 
 
 // REMAPPED CONNECTION
-byte rowPins[ROWS] = { 12, 7, 9, 10 };
-byte colPins[COLS] = { 11, 8, 6 }; 
+byte arowPins[aROWS] = { 12, 7, 9, 10 };
+byte acolPins[aCOLS] = { 11, 8, 6 }; 
+
+byte browPins[aROWS] = { A0 };     //this one is not connected yet
+byte bcolPins[aCOLS] = { 7, 9, 10 }; 
 
 
 // Create the Keypad
-Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+Keypad kpdA = Keypad( makeKeymap(akeys), arowPins, acolPins, aROWS, aCOLS );
+Keypad kpdB = Keypad( makeKeymap(bkeys), browPins, bcolPins, bROWS, bCOLS );
+
 
 #define ledpin 13
 int motorPin = 2;
@@ -169,14 +183,16 @@ void loop()
 
   int noteDuration = 1000/8;
    
-  char key = kpd.getKey();
-  int reading = digitalRead(key);
+  char keyA = kpdA.getKey();
+  char keyB = kpdB.getKey();
+  
+//  int reading = digitalRead(key);
 
   
-  if(key)  // Check for a valid key.
+  if(keyA)  // Check for a valid key.
   {
-    Serial.println(reading);
-    switch (key)
+//    Serial.println(reading);
+    switch (keyA)
     {
       // to calculate the note duration, take one second 
       // divided by the note type.
@@ -187,33 +203,40 @@ void loop()
         tone(melodyPin, NOTE_B3,noteDuration);
         delay(125);
         tone(melodyPin, NOTE_C3,noteDuration);
+        Serial.println("1");
         break;
       case '2':
         tone(melodyPin, NOTE_B3,noteDuration);
+        Serial.println("2");
         break;
       case '3':
         tone(melodyPin, NOTE_C4,noteDuration);
+        Serial.println("3");
         break;
       case '4':
         tone(melodyPin, NOTE_D4,noteDuration);
+        Serial.println("4");
         break;
       case '5':
         tone(melodyPin, NOTE_E4,noteDuration);
+        Serial.println("5");
         break;
       case '6':
         tone(melodyPin, NOTE_F4,noteDuration);
+        Serial.println("6");
         break;
       case '7':
         tone(melodyPin, NOTE_G4,noteDuration);
+        Serial.println("7");
         break;
       case '8':
         tone(melodyPin, NOTE_A4,noteDuration);
+        Serial.println("8");
         break;
       case '9':
 //        tone(melodyPin, NOTE_B4,noteDuration);
 //        int size = sizeof(underworld_melody) / sizeof(int);
         for (int thisNote = 0; thisNote < 8; thisNote++) {
-     
           // to calculate the note duration, take one second
           // divided by the note type.
           //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
@@ -228,10 +251,10 @@ void loop()
      
           // stop the tone playing:
           tone(melodyPin, 0, noteDuration);
-     
         }
-
+        Serial.println("9");
         break;
+        
       case '0':
 //        tone(melodyPin, NOTE_C5,noteDuration);
         Serial.println(" 'Mario Theme'");
@@ -244,22 +267,43 @@ void loop()
      
           // stop the tone playing:
           tone(4, 0, noteDuration);
-    }
-
-
+        }
+        Serial.println("0");
         break;
+        
       case '*':
         count++;
         if (count%2==1)
             analogWrite(motorPin, 200); 
         else
             analogWrite(motorPin, 0);
+        Serial.println("*");
         break;
       case '#':
         analogWrite(motorPin, 0);
+        Serial.println("#");
         break;
       default:
-        Serial.println(key);
+        Serial.println(keyA);
+
+    }
+  }
+
+  if (keyB){
+
+    switch(keyB){
+
+      case 'a':
+        Serial.println("a");
+        break;
+      case 'b':
+        Serial.println("b");
+        break;
+      case 'c':
+        Serial.println("c");
+        break;
+      default:
+        Serial.println(keyB);
     }
   }
 }
