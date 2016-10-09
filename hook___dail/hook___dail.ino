@@ -96,7 +96,7 @@ void setup() {
 
 void loop()
 {
-  while (digitalRead(A0)==HIGH)
+  if (digitalRead(A0)==HIGH)
 {
   int reading = digitalRead(in);
 
@@ -147,6 +147,10 @@ needToPrint = 1; // we'll need to print this number (once the dial has finished 
 }
 }
 lastState = reading;
+}
+else
+{
+MP3player.stopTrack();
 }
 } 
 
