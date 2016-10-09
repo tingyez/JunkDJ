@@ -301,12 +301,6 @@ void loop()
         tone(melodyPin, NOTE_C3,noteDuration);
 
         rainbowCycle(20);
-        lightRing(8, pixels.Color(100,150,100));
-        delay(125);
-        lightRing(10, pixels.Color(100,150,100));
-        delay(125);
-        lightRing(0, pixels.Color(100,150,100));
-        delay(125);
         
         break;
       case '#':
@@ -316,7 +310,7 @@ void loop()
         tone(melodyPin, NOTE_E3,noteDuration);
         delay(125);
         tone(melodyPin, NOTE_D3,noteDuration);
-
+        
         killRing();
         break;
       default:
@@ -399,12 +393,12 @@ void lightRing(uint8_t pos, uint32_t color){
 void rainbowCycle(uint8_t wait) {
   uint16_t i, j;
 
-  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
+  for(j=0; j<1; j++) { // 5 cycles of all colors on wheel
     for(i=0; i< ringPixels; i++) {
       pixels.setPixelColor(i, Wheel(((i * 256 / ringPixels) + j) & 255));
+      pixels.show();
+      delay(wait);
     }
-    pixels.show();
-    delay(wait);
   }
 }
 
