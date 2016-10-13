@@ -175,7 +175,9 @@ int underworld_tempo[] = {
   3, 3, 3
 };
 
-  int count=0;
+int count=0;
+
+bool ringOn = false;
 
 void setup()
 {
@@ -224,63 +226,63 @@ void loop()
         tone(melodyPin, NOTE_A3,noteDuration);
         Serial.println("1");
     
-        lightRing(0, pixels.Color(0,255,0));  
+        lightRing(0, 6, pixels.Color(0,255,0), 200);
         
         break;
       case '2':
         tone(melodyPin, NOTE_B3,noteDuration);
         Serial.println("2");
 
-        lightRing(1, pixels.Color(255,0,0)); 
+        lightRing(1, 7, pixels.Color(255,0,0), 200); 
         
         break;
       case '3':
         tone(melodyPin, NOTE_C4,noteDuration);
         Serial.println("3");
 
-        lightRing(2, pixels.Color(255,0,255)); 
+        lightRing(2, 8, pixels.Color(255,0,255), 200);
         
         break;
       case '4':
         tone(melodyPin, NOTE_D4,noteDuration);
         Serial.println("4");
 
-        lightRing(3, pixels.Color(0,0,255)); 
+        lightRing(3, 9, pixels.Color(0,0,255), 200); 
         
         break;
       case '5':
         tone(melodyPin, NOTE_E4,noteDuration);
         Serial.println("5");
 
-        lightRing(4, pixels.Color(150,0,250)); 
+        lightRing(4, 10, pixels.Color(150,0,250), 200);
         
         break;
       case '6':
         tone(melodyPin, NOTE_F4,noteDuration);
         Serial.println("6");
 
-        lightRing(5, pixels.Color(0,150,250)); 
+        lightRing(5,11, pixels.Color(0,150,250), 200);
         
         break;
       case '7':
         tone(melodyPin, NOTE_G4,noteDuration);
         Serial.println("7");
 
-        lightRing(6, pixels.Color(150,150,250)); 
+        lightRing(6,0, pixels.Color(150,150,250), 200); 
         
         break;
       case '8':
         tone(melodyPin, NOTE_A4,noteDuration);
         Serial.println("8");
         
-        lightRing(7, pixels.Color(250,150,0)); 
+        lightRing(7, 1, pixels.Color(250,150,0), 200);
         
         break;
       case '9':
         tone(melodyPin, NOTE_B4,noteDuration);
         Serial.println("9");
 
-        lightRing(8, pixels.Color(100,150,100)); 
+        lightRing(8, 2, pixels.Color(100,150,100), 200); 
         
         break;
         
@@ -288,7 +290,7 @@ void loop()
         tone(melodyPin, NOTE_C5,noteDuration);
         Serial.println("0");
 
-        lightRing(9, pixels.Color(200,100,50)); 
+        lightRing(9, 3, pixels.Color(200,100,50), 200); 
         
         break;
         
@@ -300,8 +302,13 @@ void loop()
         delay(125);
         tone(melodyPin, NOTE_C3,noteDuration);
 
-        rainbowCycle(20);
-        
+        if (!ringOn){
+          ringOn = true;
+          rainbowCycle(20);
+        } else{
+          ringOn = false;
+          killRing();
+        }
         break;
       case '#':
         Serial.println("#");
@@ -310,8 +317,14 @@ void loop()
         tone(melodyPin, NOTE_E3,noteDuration);
         delay(125);
         tone(melodyPin, NOTE_D3,noteDuration);
-        
-        killRing();
+
+        if (!ringOn){
+          ringOn = true;
+          rainbowCycle2(20);
+        } else{
+          ringOn = false;
+          killRing();
+        }
         break;
       default:
         Serial.println(keyA);
@@ -328,6 +341,8 @@ void loop()
 
       case 'a':
 
+        marioRainbowCycle1();
+         
         Serial.println(" 'Mario Theme'");
 //        int size = sizeof(melody) / sizeof(int);
         for (int thisNote = 0; thisNote < 12; thisNote++) {
@@ -339,6 +354,8 @@ void loop()
           // stop the tone playing:
           tone(4, 0, noteDuration);
         }
+
+        marioRainbowCycle2();
         
         break;
       case 'b':
@@ -346,15 +363,21 @@ void loop()
         
         count++;
         if (count%2==1){
-            analogWrite(motorPin, 200); 
+            analogWrite(motorPin, 200);
+            ringOn = true;
+            rainbowCycle(0);
         }
         else{
             analogWrite(motorPin, 0);
+            ringOn = false;
+            killRing();
         }
         break;
       case 'c':
         Serial.println("c");
 
+        marioRainbowCycle2();
+        
         //        int size = sizeof(underworld_melody) / sizeof(int);
         for (int thisNote = 0; thisNote < 8; thisNote++) {
           // to calculate the note duration, take one second
@@ -372,6 +395,9 @@ void loop()
           // stop the tone playing:
           tone(melodyPin, 0, noteDuration);
         }
+
+        marioRainbowCycle1();
+         
         break;
       default:
         Serial.println(keyB);
@@ -380,13 +406,44 @@ void loop()
    
 }
 
-void lightRing(uint8_t pos, uint32_t color){
+void lightRing(uint8_t pos, uint8_t pos2, uint32_t color, uint8_t wait){
   // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
   pixels.setPixelColor(pos, color); 
+  pixels.setPixelColor(pos2, color); 
   pixels.show(); // This sends the updated pixel color to the hardware.
-  delay (200);
+  delay (wait);
   pixels.setPixelColor(pos, 0); 
+  pixels.setPixelColor(pos2, 0); 
   pixels.show();
+}
+
+void marioRainbowCycle1() {
+  uint16_t i, j;
+
+  for(j=0; j<1; j++) { // 5 cycles of all colors on wheel
+    for(i=0; i< ringPixels; i++) {
+      pixels.setPixelColor(i, Wheel(((i * 256 / ringPixels) + j) & 255));
+      pixels.show();
+      delay(20);
+      pixels.setPixelColor(i, 0);
+      pixels.show();
+    }
+  }
+}
+
+void marioRainbowCycle2() {
+  uint16_t i, j;
+
+  for(j=0; j<1; j++) { // 5 cycles of all colors on wheel
+    for(i=ringPixels-1; i>= 0 & i < ringPixels; i--) {
+      pixels.setPixelColor(i, Wheel(((i * 256 / ringPixels) + j) & 255));
+      pixels.show();
+      delay(20);
+      pixels.setPixelColor(i, 0);
+      pixels.show();
+      Serial.println (i);
+    }
+  }
 }
 
 // Slightly different, this makes the rainbow equally distributed throughout
@@ -395,6 +452,18 @@ void rainbowCycle(uint8_t wait) {
 
   for(j=0; j<1; j++) { // 5 cycles of all colors on wheel
     for(i=0; i< ringPixels; i++) {
+      pixels.setPixelColor(i, Wheel(((i * 256 / ringPixels) + j) & 255));
+      pixels.show();
+      delay(wait);
+    }
+  }
+}
+
+void rainbowCycle2(uint8_t wait) {
+  uint16_t i, j;
+
+  for(j=0; j<1; j++) { // 5 cycles of all colors on wheel
+    for(i=ringPixels-1; i>= 0 & i < ringPixels; i--) {
       pixels.setPixelColor(i, Wheel(((i * 256 / ringPixels) + j) & 255));
       pixels.show();
       delay(wait);
@@ -418,10 +487,15 @@ uint32_t Wheel(byte WheelPos) {
 }
 
 void killRing (){
-  for(uint16_t i=0; i< ringPixels; i++) {
+  uint16_t i, j;
+
+  for(j=0; j<1; j++) { // 5 cycles of all colors on wheel
+    for(i=ringPixels-1; i>= 0 & i < ringPixels; i--) {
       pixels.setPixelColor(i, 0);
+      pixels.show();
+      delay(10);
     }
-    pixels.show();
+  }
 }
 
 
