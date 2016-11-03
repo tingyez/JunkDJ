@@ -48,10 +48,6 @@ int8_t buffer_pos; // next position to recieve character from Serial port.
 
 
 //////////////// BLUETOOTH
-#define bt_power 7
-#define bt_key_power 8
-#define indication_led 13
-
 #include <SoftwareSerial.h>
 SoftwareSerial BT(2, 3); // RX | TX
 
@@ -89,31 +85,9 @@ void setup() {
 
 
   ///////////////////////////////////////////////////// SETUP BLUETOOTH
-  // set the pins to OUTPUT
-  pinMode(bt_power, OUTPUT);  
-  pinMode(bt_key_power, OUTPUT);
-  pinMode(indication_led, OUTPUT);
-  
-  // set the pins to LOW
-  digitalWrite(bt_power, LOW);
-  digitalWrite(bt_key_power, LOW);
-  digitalWrite(indication_led, LOW);
-
-  // make sure the key has been LOW for a bit
-  delay(100);
-  
-  // set the key pin to High
-  digitalWrite(bt_key_power, HIGH);
-  
-  // small delay
-  delay(100);
-  
-  // now power on the BT
-  digitalWrite(bt_power, HIGH);
-  
   // start our serial so we can send and recieve
   // information from the BT module
-  Serial.begin(9600);
+  //Serial.begin(9600);
   // initiate the BT serial at 38400 which is the default 
   // speed at which the BT AT mode operates at
   BT.begin(38400);
@@ -123,8 +97,6 @@ void setup() {
   Serial.write("For a list of commands, visit: \n");
   Serial.write("Type AT commands  \n\n");
   
-  // process complete turn on led 13
-  digitalWrite(indication_led, HIGH);
   
   // Send an "AT" command to the AT (without quotes)
   // if response is OK, then we are connected
