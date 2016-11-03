@@ -82,8 +82,7 @@ void setup() {
   Serial.println("0: stop the music");
   Serial.println();
   Serial.println();
-
-
+  
   ///////////////////////////////////////////////////// SETUP BLUETOOTH
   // start our serial so we can send and recieve
   // information from the BT module
@@ -112,7 +111,6 @@ void setup() {
   //Initialize the MP3 Player Shield
   result = MP3player.begin();
   //check result, see readme for error codes.
-  }
 
   #if (0)
   // Typically not used by most shields, hence commented out.
@@ -122,6 +120,8 @@ void setup() {
     MP3player.ADMixerVol(-3);
   }
   #endif
+}
+
 
 void loop()
 {
