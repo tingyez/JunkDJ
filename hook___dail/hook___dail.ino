@@ -53,7 +53,7 @@ int8_t buffer_pos; // next position to recieve character from Serial port.
 #define indication_led 13
 
 #include <SoftwareSerial.h>
-SoftwareSerial BT(3, 2); // RX | TX
+SoftwareSerial BT(2, 3); // RX | TX
 
 char c = ' ';
 //////////////// END BLUETOOTH
