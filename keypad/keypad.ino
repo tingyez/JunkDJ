@@ -210,8 +210,8 @@ void setup()
   Serial.println("Arduino with HC-06 is ready");
  
   // HC-06 default baud rate is 9600
-  BTSerial.begin(9600);  
-  Serial.println("BTserial started at 9600");
+  BTSerial.begin(38400);  
+  Serial.println("BTserial started at 38400");
   ///////////////////////////////////////////////// END BLUETOOTH
 }
 
