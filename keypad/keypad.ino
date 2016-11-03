@@ -179,6 +179,18 @@ int count=0;
 
 bool ringOn = false;
 
+
+//////////////////////////////////// BLUETOOTH
+
+#include <SoftwareSerial.h>
+SoftwareSerial BTSerial(A4, A5); // RX | TX
+
+char c = ' ';
+
+//////////////////////////////////// END BLUETOOTH
+
+
+
 void setup()
 {
   pinMode(ledpin,OUTPUT);
@@ -192,10 +204,32 @@ void setup()
 
   pixels.begin();
   pixels.show(); // Initialize all pixels to 'off'
+
+
+  ///////////////////////////////////////////////// BLUETOOTH
+  Serial.println("Arduino with HC-06 is ready");
+ 
+  // HC-06 default baud rate is 9600
+  BTSerial.begin(9600);  
+  Serial.println("BTserial started at 9600");
+  ///////////////////////////////////////////////// END BLUETOOTH
 }
 
 void loop()
 {
+  ///////////////////////////////////////////////// BLUETOOTH
+  // Keep reading from HC-06 and send to Arduino Serial Monitor
+  if (BTSerial.available()){
+    c = BTSerial.read();
+    Serial.write(c);
+  }
+  // Keep reading from Arduino Serial Monitor and send to HC-06
+  if (Serial.available()){
+    c = Serial.read();
+    BTSerial.write(c);
+  }
+  ///////////////////////////////////////////////// END BLUETOOTH
+  
 //  if (Serial.available())
 //  {
 //    int speed = Serial.parseInt();
