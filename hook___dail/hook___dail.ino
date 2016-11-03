@@ -89,7 +89,7 @@ void setup() {
   //Serial.begin(9600);
   // initiate the BT serial at 38400 which is the default 
   // speed at which the BT AT mode operates at
-  BT.begin(38400);
+  BT.begin(9600);
   Serial.println("BT started at 38400");
   
   // self explanatory
