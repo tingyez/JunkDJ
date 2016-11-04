@@ -53,7 +53,7 @@ int dialHasFinishedRotatingAfterMs = 100;
 int debounceDelay = 10;
 int needToPrint = 0;
 int count;
-int in = 5;
+int in = A1;
 int lastState = LOW;
 int trueState = LOW;
 long lastStateChangeTime = 0; 
@@ -96,7 +96,7 @@ void setup() {
 
 void loop()
 {
-  while (digitalRead(10)==HIGH)
+  if (digitalRead(A0)==HIGH)
 {
   int reading = digitalRead(in);
 
@@ -147,6 +147,10 @@ needToPrint = 1; // we'll need to print this number (once the dial has finished 
 }
 }
 lastState = reading;
+}
+else
+{
+MP3player.stopTrack();
 }
 } 
 

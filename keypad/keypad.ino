@@ -74,7 +74,7 @@ Keypad kpdB = Keypad( makeKeymap(bkeys), browPins, bcolPins, bROWS, bCOLS );
 
 #define ledpin 13
 int motorPin = 2;
-int melodyPin = 4;
+int melodyPin = A2;
 
 //Mario main theme melody
 int melody[] = {
