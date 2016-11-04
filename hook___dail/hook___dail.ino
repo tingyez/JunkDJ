@@ -54,6 +54,8 @@ SoftwareSerial BT(2, 3); // RX | TX
 char c = ' ';
 //////////////// END BLUETOOTH
 
+bool activate = false;
+
 
 // constants
 
@@ -127,21 +129,25 @@ void loop()
 {
   ///////////////////////////////////////// BLUETOOTH
   // listen for a response from the HC-05 and write it to the serial monitor
-  if (BT.available()){
-    c = BT.read();
-    Serial.write(c);
-  }
-  // listen for user input and send it to the HC-05
-  if (Serial.available()){
-    c = Serial.read();
-    Serial.write(c);
-    BT.write(c);
-  }
+//  if (BT.available()){
+//    c = BT.read();
+//    Serial.write(c);
+//  }
+
   ///////////////////////////////////////// END BLUETOOTH
   
   if (digitalRead(A0)==HIGH)
   {
     int reading = digitalRead(in);
+
+      // write on
+      if(activate == false){
+        activate = true;
+        c = 'n';
+        Serial.println(c);
+        BT.write(c);
+      }
+ 
   
   
     if ((millis() - lastStateChangeTime) > dialHasFinishedRotatingAfterMs) {
@@ -193,6 +199,11 @@ void loop()
   }
   else {
     MP3player.stopTrack();
+    if(activate == true){
+      activate = false;
+      c = 'f';
+      BT.write(c);
+    }
   }
 } 
 

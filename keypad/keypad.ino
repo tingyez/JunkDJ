@@ -189,6 +189,8 @@ char c = ' ';
 
 //////////////////////////////////// END BLUETOOTH
 
+bool activate = false;
+
 
 
 void setup()
@@ -223,11 +225,11 @@ void loop()
     c = BTSerial.read();
     Serial.write(c);
   }
-  // Keep reading from Arduino Serial Monitor and send to HC-06
-  if (Serial.available()){
-    c = Serial.read();
-    BTSerial.write(c);
-  }
+//  // Keep reading from Arduino Serial Monitor and send to HC-06
+//  if (Serial.available()){
+//    c = Serial.read();
+//    BTSerial.write(c);
+//  }
   ///////////////////////////////////////////////// END BLUETOOTH
   
 //  if (Serial.available())
@@ -238,9 +240,15 @@ void loop()
 //      analogWrite(motorPin, speed);
 //    }
 //  }
-  
 
-  int noteDuration = 1000/8;
+  if (c == 'n') {activate = true;}
+  else if (c == 'f') {activate = false;}
+  
+  if (activate == true) kpfunction();
+}
+
+void kpfunction(){
+    int noteDuration = 1000/8;
    
   char keyA = kpdA.getKey();
   char keyB = kpdB.getKey();
@@ -437,7 +445,6 @@ void loop()
         Serial.println(keyB);
     }
   }
-   
 }
 
 void lightRing(uint8_t pos, uint8_t pos2, uint32_t color, uint8_t wait){
